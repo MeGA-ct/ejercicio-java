@@ -13,5 +13,5 @@ public interface LibroMapper {
 
     LibroDTO libroDaoToLibroDto(LibroDAO libroDao);
 
-    List<LibroDTO> libroDaoToLibroDto(List<LibroDAO> libroDaoList);
+    List<LibroDTO> librosDaoToLibrosDto(List<LibroDAO> libroDaoList);
 }

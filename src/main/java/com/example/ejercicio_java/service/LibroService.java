@@ -7,4 +7,6 @@ import java.util.List;
 public interface LibroService {
 
     List<LibroDTO> obtenerLibros();
+
+    LibroDTO obtenerUnLibro(final Long libroId);
 }

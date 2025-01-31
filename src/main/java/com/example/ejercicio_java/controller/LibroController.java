@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,22 +19,30 @@ public class LibroController {
 
     private final LibroService libroService;
 
+    public static final Logger LOGGER = LoggerFactory.getLogger(LibroController.class);
     @Autowired
     public LibroController(LibroService libroService) {
         this.libroService = libroService;
     }
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(LibroController.class);
-
     @GetMapping
-    public ResponseEntity<List<LibroDTO>> obtenerLibros(){
-
+    public ResponseEntity<List<LibroDTO>> obtenerLibros() {
 
         LOGGER.debug("LibroController.obtenerLibros: obteniendo todos los libros ... ");
 
         List<LibroDTO> resultado = libroService.obtenerLibros();
 
         LOGGER.debug("LibroController.obtenerLibros: se han obtenido {} libros.", resultado.size());
+
+        return ResponseEntity.ok(resultado);
+    }
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<LibroDTO> obtenerUnLibro(@PathVariable("id") Long libroId){
+        LOGGER.debug("LibroController.obtenerUnLibro: obteniendo todos los libros ... ");
+
+        LibroDTO resultado = libroService.obtenerUnLibro(libroId);
+
+        LOGGER.debug("LibroController.obtenerUnLibro: se ha obtenido el libro {}.", resultado.getTitulo());
 
         return ResponseEntity.ok(resultado);
     }
