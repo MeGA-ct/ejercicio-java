@@ -2,6 +2,7 @@ package com.example.ejercicio_java.controller;
 
 import com.example.ejercicio_java.controller.request.LibroBody;
 import com.example.ejercicio_java.dto.LibroDTO;
+import com.example.ejercicio_java.exceptions.libro.LibroException;
 import com.example.ejercicio_java.service.LibroService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,18 +47,21 @@ public class LibroController {
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<LibroDTO> obtenerUnLibro(@PathVariable("id") Long libroId) {
+    public ResponseEntity<Object> obtenerUnLibro(@PathVariable("id") Long libroId) {
         LOGGER.debug("LibroController.obtenerUnLibro: obteniendo todos los libros ... ");
 
-        LibroDTO resultado = libroService.obtenerUnLibro(libroId);
-
-        LOGGER.debug(
-                "LibroController.obtenerUnLibro: se ha obtenido el libro {} del autor {}.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-
-        return ResponseEntity.ok(resultado);
+        try {
+            LibroDTO resultado = libroService.obtenerUnLibro(libroId);
+            LOGGER.debug(
+                    "LibroController.obtenerUnLibro: se ha obtenido el libro {} del autor {}.",
+                    resultado.getTitulo(),
+                    resultado.getAutor()
+            );
+            return ResponseEntity.ok(resultado);
+        } catch (LibroException e){
+            LOGGER.debug("LibroController.obtenerUnLibro: error al obtener libro con id {}.", libroId);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping
@@ -83,7 +87,7 @@ public class LibroController {
     }
 
     @PutMapping(path = "/{id}")
-    public ResponseEntity<LibroDTO> actualizarLibro(
+    public ResponseEntity<Object> actualizarLibro(
             @PathVariable("id") Long libroId,
             @RequestBody LibroBody libro
     ) {
@@ -95,14 +99,17 @@ public class LibroController {
                 libro.isbn(),
                 libro.fechaPublicacion()
         );
-        LibroDTO resultado = libroService.actualizarLibro(libroDTO);
-
-        LOGGER.debug(
-                "LibroController.actualizarLibro: se ha actualizado el libro {} del autor {}.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return ResponseEntity.ok(resultado);
+        try {
+            LibroDTO resultado = libroService.actualizarLibro(libroDTO);
+            LOGGER.debug(
+                    "LibroController.actualizarLibro: se ha actualizado el libro {} del autor {}.",
+                    resultado.getTitulo(),
+                    resultado.getAutor()
+            );
+            return ResponseEntity.ok(resultado);
+        } catch (LibroException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PatchMapping(path = "/{id}")

@@ -17,7 +17,7 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 1; i <= 3; i++) {
             String titulo  = "titulo " + i;
             String autor = "autor " + i;
             String isbn = "isbn " + i;

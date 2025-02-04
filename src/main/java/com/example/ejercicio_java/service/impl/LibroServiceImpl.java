@@ -2,23 +2,25 @@ package com.example.ejercicio_java.service.impl;
 
 import com.example.ejercicio_java.dao.LibroDAO;
 import com.example.ejercicio_java.dto.LibroDTO;
-import com.example.ejercicio_java.exceptions.DuplicateIsbnException;
-import com.example.ejercicio_java.exceptions.LibroNotFoundException;
+import com.example.ejercicio_java.exceptions.libro.LibroException;
 import com.example.ejercicio_java.mapper.LibroMapper;
 import com.example.ejercicio_java.repository.LibroRepository;
 import com.example.ejercicio_java.service.LibroService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class LibroServiceImpl implements LibroService {
+
+    private static final String LIBRO_NO_ENCONTRADO_MENSAJE = "El libro con %d no encontrado";
+    private static final String LIBRO_ISBN_DUPLICADO_MENSAJE = "ISBN %S ya introducido en otro libro";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(LibroServiceImpl.class);
 
@@ -47,7 +49,9 @@ public class LibroServiceImpl implements LibroService {
     public LibroDTO obtenerUnLibro(final Long libroId) {
         LOGGER.debug("LibroServiceImpl.obtenerUnLibro: obteniendo un solo libro ... ");
 
-        LibroDAO libro = libroRepository.findById(libroId).orElseThrow(() -> new LibroNotFoundException(libroId));
+        LibroDAO libro = libroRepository.findById(libroId).orElseThrow(
+                () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId))
+        );
 
         LibroDTO resultado = libroMapper.libroDaoToLibroDto(libro);
 
@@ -60,76 +64,82 @@ public class LibroServiceImpl implements LibroService {
     }
 
     @Override
-    public LibroDTO guardarLibro(LibroDTO libroDTO) {
+    public LibroDTO guardarLibro(LibroDTO libroDTO) throws LibroException {
         LOGGER.debug("LibroServiceImpl.guardarLibro: guardando libro ... ");
 
-        LibroDAO libro = libroRepository.save(libroMapper.libroDtoToLibroDao(libroDTO));
-
-        LibroDTO resultado = libroMapper.libroDaoToLibroDto(libro);
-
-        LOGGER.debug(
-                "LibroServiceImpl.guardarLibro: libro {} por {} obtenido.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return resultado;
+        try {
+            LibroDAO libroGuardado = libroRepository.save(libroMapper.libroDtoToLibroDao(libroDTO));
+            LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroGuardado);
+            LOGGER.debug(
+                    "LibroServiceImpl.guardarLibro: libro con id {} obtenido.",
+                    resultado.getId()
+            );
+            return resultado;
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.debug("LibroServiceImpl.guardarLibro: ISBN Duplicado");
+            throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libroDTO.getIsbn()));
+        }
     }
 
     @Override
-    public LibroDTO actualizarLibro(LibroDTO libroDTO) {
-        LOGGER.debug("LibroServiceImpl.actualizarLibro: guardando libro ... ");
-        LibroDAO libro = libroRepository.findById(libroDTO.getId())
-                                        .orElseThrow(() -> new LibroNotFoundException(libroDTO.getId()));
-
-        Optional<LibroDAO> existingLibro = libroRepository.findByIsbn(libroDTO.getIsbn());
-        if (existingLibro.isPresent() && !existingLibro.get().getId().equals(libro.getId())) {
-            throw new DuplicateIsbnException(libroDTO.getIsbn());
-        }
+    public LibroDTO actualizarLibro(LibroDTO libroDTO) throws LibroException {
+        LOGGER.debug("LibroServiceImpl.actualizarLibro: actualizando libro ... ");
+        LibroDAO libro = libroRepository
+                .findById(libroDTO.getId())
+                .orElseThrow(
+                        () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroDTO.getId()))
+                );
 
         libro.setTitulo(libroDTO.getTitulo());
         libro.setAutor(libroDTO.getAutor());
         libro.setIsbn(libroDTO.getIsbn());
         libro.setFechaPublicacion(libroDTO.getFechaPublicacion());
 
-        LibroDAO libroSaved = libroRepository.save(libro);
-
-        LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroSaved);
-
-        LOGGER.debug(
-                "LibroServiceImpl.actualizarLibro: libro {} por {} obtenido.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return resultado;
+        try {
+            LibroDAO libroGuardado = libroRepository.save(libro);
+            LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroGuardado);
+            LOGGER.debug(
+                    "LibroServiceImpl.actualizarLibro: libro con id {} obtenido.",
+                    resultado.getId()
+            );
+            return resultado;
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.debug("LibroServiceImpl.actualizarLibro: ISBN Duplicado");
+            throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libro.getIsbn()));
+        }
     }
 
     @Override
     public LibroDTO actualizarParcialmenteLibro(Long libroId, Map<String, Object> updates) {
-        LOGGER.debug("LibroServiceImpl.actualizarParcialmenteLibro: guardando libro ... ");
+        LOGGER.debug("LibroServiceImpl.actualizarParcialmenteLibro: actualizando parcialmente libro ... ");
 
-        LibroDAO libro = libroRepository.findById(libroId).orElseThrow(() -> new LibroNotFoundException(libroId));
-        if (updates.containsKey("titulo")){
+        LibroDAO libro = libroRepository.findById(libroId).orElseThrow(
+                () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId))
+        );
+        if (updates.containsKey("titulo")) {
             libro.setTitulo(updates.get("titulo").toString());
         }
-        if (updates.containsKey("autor")){
+        if (updates.containsKey("autor")) {
             libro.setAutor(updates.get("autor").toString());
         }
-        if (updates.containsKey("isbn")){
+        if (updates.containsKey("isbn")) {
             libro.setIsbn(updates.get("isbn").toString());
         }
-        if (updates.containsKey("fechaPublicacion")){
+        if (updates.containsKey("fechaPublicacion")) {
             libro.setFechaPublicacion(LocalDate.parse(updates.get("fechaPublicacion").toString()));
         }
 
-        LibroDAO libroReturn = libroRepository.save(libro);
-
-        LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroReturn);
-
-        LOGGER.debug(
-                "LibroServiceImpl.actualizarParcialmenteLibro: libro {} por {} obtenido.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return resultado;
+        try {
+            LibroDAO libroSaved = libroRepository.save(libro);
+            LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroSaved);
+            LOGGER.debug(
+                    "LibroServiceImpl.actualizarParcialmenteLibro: libro con id {} obtenido.",
+                    resultado.getId()
+            );
+            return resultado;
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.debug("LibroServiceImpl.actualizarParcialmenteLibro: ISBN Duplicado");
+            throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libro.getIsbn()));
+        }
     }
 }

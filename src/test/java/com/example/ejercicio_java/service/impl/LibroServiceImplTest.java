@@ -2,7 +2,7 @@ package com.example.ejercicio_java.service.impl;
 
 import com.example.ejercicio_java.dao.LibroDAO;
 import com.example.ejercicio_java.dto.LibroDTO;
-import com.example.ejercicio_java.exceptions.LibroNotFoundException;
+import com.example.ejercicio_java.exceptions.libro.LibroException;
 import com.example.ejercicio_java.repository.LibroRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,6 +72,6 @@ class LibroServiceImplTest {
     void testObtenerUnLibroNotFound() {
         when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThrows(LibroNotFoundException.class, () -> libroService.obtenerUnLibro(1L));
+        assertThrows(LibroException.class, () -> libroService.obtenerUnLibro(1L));
     }
 }
