@@ -11,6 +11,8 @@ import java.util.List;
 public interface LibroMapper {
     LibroMapper INSTANCE = Mappers.getMapper(LibroMapper.class);
 
+    LibroDAO libroDtoToLibroDao(LibroDTO libroDto);
+
     LibroDTO libroDaoToLibroDto(LibroDAO libroDao);
 
     List<LibroDTO> librosDaoToLibrosDto(List<LibroDAO> libroDaoList);

@@ -2,22 +2,24 @@ package com.example.ejercicio_java.service.impl;
 
 import com.example.ejercicio_java.dao.LibroDAO;
 import com.example.ejercicio_java.dto.LibroDTO;
+import com.example.ejercicio_java.exceptions.LibroNotFoundException;
 import com.example.ejercicio_java.repository.LibroRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
 class LibroServiceImplTest {
 
     @Mock
@@ -26,10 +28,11 @@ class LibroServiceImplTest {
     @InjectMocks
     private LibroServiceImpl libroService;
 
-    private final List<LibroDAO> libros = new ArrayList<>();
+    List<LibroDAO> libros = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
         for (int i = 0; i < 3; i++) {
             LibroDAO libro = new LibroDAO(
                     "Libro " + i,
@@ -37,17 +40,38 @@ class LibroServiceImplTest {
                     "isbn " + i,
                     LocalDate.now().plusDays(i)
             );
+            libro.setId((long) i);
             libros.add(libro);
         }
     }
 
     @Test
-    void obtenerLibros() {
+    void testObtenerLibros() {
 
         when(libroRepository.findAll()).thenReturn(libros);
 
         List<LibroDTO> resultado = libroService.obtenerLibros();
 
         assertEquals(3, resultado.size());
+    }
+
+    @Test
+    void testObtenerUnLibro() {
+        int indiceLista = 0;
+        LibroDAO unLibro = libros.get(indiceLista);
+        unLibro.setId((long) indiceLista); //Simulated save
+
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.of(unLibro));
+
+        LibroDTO resultado = libroService.obtenerUnLibro(unLibro.getId());
+
+        assertEquals(unLibro.getTitulo(), resultado.getTitulo());
+    }
+
+    @Test
+    void testObtenerUnLibroNotFound() {
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        assertThrows(LibroNotFoundException.class, () -> libroService.obtenerUnLibro(1L));
     }
 }

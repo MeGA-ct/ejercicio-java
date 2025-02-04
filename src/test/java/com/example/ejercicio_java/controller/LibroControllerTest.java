@@ -5,6 +5,7 @@ import com.example.ejercicio_java.service.LibroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +42,8 @@ class LibroControllerTest {
 
     @BeforeEach
     public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
         for (int i = 0; i < 2; i++) {
             LibroDTO libro = new LibroDTO(
                     (long) i,
@@ -70,6 +74,19 @@ class LibroControllerTest {
                .andExpect(jsonPath("$[1].isbn", is(libros.get(1).getIsbn())));
 
         verify(libroService, times(1)).obtenerLibros();
+    }
+
+    @Test
+    void testObtenerUnLibro() throws Exception{
+        when(libroService.obtenerUnLibro(any(Long.class))).thenReturn(libros.get(0));
+        mockMvc.perform(get("/libros/0").contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.id", is(libros.get(0).getId().intValue())))
+               .andExpect(jsonPath("$.titulo", is(libros.get(0).getTitulo())))
+               .andExpect(jsonPath("$.autor", is(libros.get(0).getAutor())))
+               .andExpect(jsonPath("$.isbn", is(libros.get(0).getIsbn())));
+
     }
 }
 
