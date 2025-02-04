@@ -16,4 +16,6 @@ public interface LibroService {
     LibroDTO actualizarLibro(final LibroDTO libroDTO);
 
     LibroDTO actualizarParcialmenteLibro(final Long libroId, final Map<String,Object> updates);
+
+    void borrarLibro(final Long libroId);
 }

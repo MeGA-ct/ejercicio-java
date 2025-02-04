@@ -19,8 +19,8 @@ import java.util.Map;
 @Service
 public class LibroServiceImpl implements LibroService {
 
-    private static final String LIBRO_NO_ENCONTRADO_MENSAJE = "El libro con %d no encontrado";
-    private static final String LIBRO_ISBN_DUPLICADO_MENSAJE = "ISBN %S ya introducido en otro libro";
+    private static final String LIBRO_NO_ENCONTRADO_MENSAJE = "El libro con id[%d] no encontrado";
+    private static final String LIBRO_ISBN_DUPLICADO_MENSAJE = "ISBN [%S] ya introducido en otro libro";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(LibroServiceImpl.class);
 
@@ -35,19 +35,19 @@ public class LibroServiceImpl implements LibroService {
 
     @Override
     public List<LibroDTO> obtenerLibros() {
-        LOGGER.debug("LibroServiceImpl.obtenerLibros: obteniendo todos los libros ... ");
+        LOGGER.info("LibroServiceImpl.obtenerLibros: obteniendo todos los libros");
 
         List<LibroDAO> libros = libroRepository.findAll();
 
         List<LibroDTO> resultado = libroMapper.librosDaoToLibrosDto(libros);
 
-        LOGGER.debug("LibroServiceImpl.obtenerLibros: se han obtenido {} libros.", resultado.size());
+        LOGGER.info("LibroServiceImpl.obtenerLibros: se han obtenido {} libros.", resultado.size());
         return resultado;
     }
 
     @Override
     public LibroDTO obtenerUnLibro(final Long libroId) {
-        LOGGER.debug("LibroServiceImpl.obtenerUnLibro: obteniendo un solo libro ... ");
+        LOGGER.info("LibroServiceImpl.obtenerUnLibro: obteniendo un solo libro");
 
         LibroDAO libro = libroRepository.findById(libroId).orElseThrow(
                 () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId))
@@ -55,8 +55,8 @@ public class LibroServiceImpl implements LibroService {
 
         LibroDTO resultado = libroMapper.libroDaoToLibroDto(libro);
 
-        LOGGER.debug(
-                "LibroServiceImpl.obtenerUnLibro: libro {} por {} obtenido.",
+        LOGGER.info(
+                "LibroServiceImpl.obtenerUnLibro: libro {} por {} obtenido",
                 resultado.getTitulo(),
                 resultado.getAutor()
         );
@@ -65,25 +65,25 @@ public class LibroServiceImpl implements LibroService {
 
     @Override
     public LibroDTO guardarLibro(LibroDTO libroDTO) throws LibroException {
-        LOGGER.debug("LibroServiceImpl.guardarLibro: guardando libro ... ");
+        LOGGER.info("LibroServiceImpl.guardarLibro: guardando libro");
 
         try {
             LibroDAO libroGuardado = libroRepository.save(libroMapper.libroDtoToLibroDao(libroDTO));
             LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroGuardado);
-            LOGGER.debug(
-                    "LibroServiceImpl.guardarLibro: libro con id {} obtenido.",
+            LOGGER.info(
+                    "LibroServiceImpl.guardarLibro: libro con id {} obtenido",
                     resultado.getId()
             );
             return resultado;
         } catch (DataIntegrityViolationException e) {
-            LOGGER.debug("LibroServiceImpl.guardarLibro: ISBN Duplicado");
+            LOGGER.info("LibroServiceImpl.guardarLibro: ISBN Duplicado");
             throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libroDTO.getIsbn()));
         }
     }
 
     @Override
     public LibroDTO actualizarLibro(LibroDTO libroDTO) throws LibroException {
-        LOGGER.debug("LibroServiceImpl.actualizarLibro: actualizando libro ... ");
+        LOGGER.info("LibroServiceImpl.actualizarLibro: actualizando libro");
         LibroDAO libro = libroRepository
                 .findById(libroDTO.getId())
                 .orElseThrow(
@@ -98,20 +98,20 @@ public class LibroServiceImpl implements LibroService {
         try {
             LibroDAO libroGuardado = libroRepository.save(libro);
             LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroGuardado);
-            LOGGER.debug(
-                    "LibroServiceImpl.actualizarLibro: libro con id {} obtenido.",
+            LOGGER.info(
+                    "LibroServiceImpl.actualizarLibro: libro con id {} obtenido",
                     resultado.getId()
             );
             return resultado;
         } catch (DataIntegrityViolationException e) {
-            LOGGER.debug("LibroServiceImpl.actualizarLibro: ISBN Duplicado");
+            LOGGER.info("LibroServiceImpl.actualizarLibro: ISBN Duplicado");
             throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libro.getIsbn()));
         }
     }
 
     @Override
-    public LibroDTO actualizarParcialmenteLibro(Long libroId, Map<String, Object> updates) {
-        LOGGER.debug("LibroServiceImpl.actualizarParcialmenteLibro: actualizando parcialmente libro ... ");
+    public LibroDTO actualizarParcialmenteLibro(Long libroId, Map<String, Object> updates) throws LibroException {
+        LOGGER.info("LibroServiceImpl.actualizarParcialmenteLibro: actualizando parcialmente libro");
 
         LibroDAO libro = libroRepository.findById(libroId).orElseThrow(
                 () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId))
@@ -132,14 +132,25 @@ public class LibroServiceImpl implements LibroService {
         try {
             LibroDAO libroSaved = libroRepository.save(libro);
             LibroDTO resultado = libroMapper.libroDaoToLibroDto(libroSaved);
-            LOGGER.debug(
-                    "LibroServiceImpl.actualizarParcialmenteLibro: libro con id {} obtenido.",
+            LOGGER.info(
+                    "LibroServiceImpl.actualizarParcialmenteLibro: libro con id {} obtenido",
                     resultado.getId()
             );
             return resultado;
         } catch (DataIntegrityViolationException e) {
-            LOGGER.debug("LibroServiceImpl.actualizarParcialmenteLibro: ISBN Duplicado");
+            LOGGER.info("LibroServiceImpl.actualizarParcialmenteLibro: ISBN Duplicado");
             throw new LibroException(501, String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libro.getIsbn()));
         }
+    }
+
+    @Override
+    public void borrarLibro(Long libroId) {
+        LOGGER.info("LibroServiceImpl.borrarLibro: borrando el libro con id {}", libroId);
+
+        libroRepository.delete(
+                libroRepository.findById(libroId).orElseThrow(
+                        () -> new LibroException(500, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId))
+                ));
+        LOGGER.info("LibroServiceImpl.borrarLibro: se ha borrado libro con id {}", libroId);
     }
 }

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,53 +38,58 @@ public class LibroController {
     @GetMapping
     public ResponseEntity<List<LibroDTO>> obtenerLibros() {
 
-        LOGGER.debug("LibroController.obtenerLibros: obteniendo todos los libros ... ");
+        LOGGER.info("LibroController.obtenerLibros: obteniendo todos los libros");
 
         List<LibroDTO> resultado = libroService.obtenerLibros();
 
-        LOGGER.debug("LibroController.obtenerLibros: se han obtenido {} libros.", resultado.size());
+        LOGGER.info("LibroController.obtenerLibros: se han obtenido {} libros.", resultado.size());
 
         return ResponseEntity.ok(resultado);
     }
 
     @GetMapping(path = "/{id}")
     public ResponseEntity<Object> obtenerUnLibro(@PathVariable("id") Long libroId) {
-        LOGGER.debug("LibroController.obtenerUnLibro: obteniendo todos los libros ... ");
+        LOGGER.info("LibroController.obtenerUnLibro: obteniendo todos los libros");
 
         try {
             LibroDTO resultado = libroService.obtenerUnLibro(libroId);
-            LOGGER.debug(
+            LOGGER.info(
                     "LibroController.obtenerUnLibro: se ha obtenido el libro {} del autor {}.",
                     resultado.getTitulo(),
                     resultado.getAutor()
             );
             return ResponseEntity.ok(resultado);
-        } catch (LibroException e){
-            LOGGER.debug("LibroController.obtenerUnLibro: error al obtener libro con id {}.", libroId);
+        } catch (LibroException e) {
+            LOGGER.info("LibroController.obtenerUnLibro: error al obtener libro con id {}.", libroId);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping
-    public ResponseEntity<LibroDTO> guardarLibro(@RequestBody LibroBody libro) {
-        LOGGER.debug("LibroController.guardarLibro: guardando un nuevo libro ... ");
+    public ResponseEntity<Object> guardarLibro(@RequestBody LibroBody libro) {
+        LOGGER.info("LibroController.guardarLibro: guardando un nuevo libro");
+        try {
+            LibroDTO libroDTO = new LibroDTO(
+                    null,
+                    libro.titulo(),
+                    libro.autor(),
+                    libro.isbn(),
+                    libro.fechaPublicacion()
+            );
+            LibroDTO resultado = libroService.guardarLibro(libroDTO);
+            LOGGER.info(
+                    "LibroController.guardarLibro: se ha guardado el libro {} del autor {} con id {}",
+                    resultado.getTitulo(),
+                    resultado.getAutor(),
+                    resultado.getId()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
+        } catch (LibroException e) {
+            LOGGER.info("LibroController.guardarLibro: error al guardar libro");
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
-        LibroDTO libroDTO = new LibroDTO(
-                null,
-                libro.titulo(),
-                libro.autor(),
-                libro.isbn(),
-                libro.fechaPublicacion()
-        );
 
-        LibroDTO resultado = libroService.guardarLibro(libroDTO);
-
-        LOGGER.debug(
-                "LibroController.guardarLibro: se ha guardado el libro {} del autor {}.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
     }
 
     @PutMapping(path = "/{id}")
@@ -91,7 +97,7 @@ public class LibroController {
             @PathVariable("id") Long libroId,
             @RequestBody LibroBody libro
     ) {
-        LOGGER.debug("LibroController.actualizarLibro: actualizando el libro con id {} ... ", libroId);
+        LOGGER.info("LibroController.actualizarLibro: actualizando el libro con id {}", libroId);
         LibroDTO libroDTO = new LibroDTO(
                 libroId,
                 libro.titulo(),
@@ -101,35 +107,52 @@ public class LibroController {
         );
         try {
             LibroDTO resultado = libroService.actualizarLibro(libroDTO);
-            LOGGER.debug(
+            LOGGER.info(
                     "LibroController.actualizarLibro: se ha actualizado el libro {} del autor {}.",
                     resultado.getTitulo(),
                     resultado.getAutor()
             );
             return ResponseEntity.ok(resultado);
-        } catch (LibroException e){
+        } catch (LibroException e) {
+            LOGGER.info("LibroController.actualizarLibro: error al modificar libro con id {}", libroId);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PatchMapping(path = "/{id}")
-    public ResponseEntity<LibroDTO> actualizarParcialmenteLibro(
+    public ResponseEntity<Object> actualizarParcialmenteLibro(
             @PathVariable("id") Long libroId,
             @RequestBody Map<String, Object> updates
     ) {
-        LOGGER.debug(
-                "LibroController.actualizarParcialmenteLibro: actualizando parcialmente el libro con id {} ... ",
+        LOGGER.info(
+                "LibroController.actualizarParcialmenteLibro: actualizando parcialmente el libro con id {}",
                 libroId
         );
-
-        LibroDTO resultado = libroService.actualizarParcialmenteLibro(libroId, updates);
-
-        LOGGER.debug(
-                "LibroController.actualizarParcialmenteLibro: se ha actualizado parcialmente el libro {} del autor {}.",
-                resultado.getTitulo(),
-                resultado.getAutor()
-        );
-        return ResponseEntity.ok(resultado);
+        try {
+            LibroDTO resultado = libroService.actualizarParcialmenteLibro(libroId, updates);
+            LOGGER.info(
+                    "LibroController.actualizarParcialmenteLibro: se ha actualizado parcialmente libro con id {}",
+                    resultado.getId()
+            );
+            return ResponseEntity.ok(resultado);
+        } catch (LibroException e) {
+            LOGGER.info("LibroController.actualizarParcialmenteLibro: error al modificar libro con id {}", libroId);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
+    @DeleteMapping(path = "/{id}")
+    public ResponseEntity<String> borrarLibro(
+            @PathVariable("id") Long libroId
+    ) {
+        LOGGER.info("LibroController.borrarLibro: borrando el libro con id {}", libroId);
+        try {
+            libroService.borrarLibro(libroId);
+            LOGGER.info("LibroController.borrarLibro: se ha borrado libro con id {}", libroId);
+            return ResponseEntity.noContent().build();
+        } catch (LibroException e) {
+            LOGGER.info("LibroController.borrarLibro: error al borrar libro con id {}", libroId);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
