@@ -41,13 +41,13 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 |isbn             |`String`    |Código ISBN del libro          |
 |fechaPublicacion |`LocalDate` |Fecha de publicación del libro.|
 #### Usuario:
-|columna          |Tipo        |Comentario                       |
+| columna         |Tipo        |Comentario                       |
 |-----------------|------------|---------------------------------|
-|id               |`Long`      |Identificador único del usuario. |
-|nombre           |`String`    |Nombre del usuario.              |
-|email            |`String`    |Correo electrónico del usuario.  |
-|telefono         |`String`    |Número de teléfono del usuario.  |
-|fechaPublicacion |`LocalDate` |Fecha de registro del usuario.   |
+| id              |`Long`      |Identificador único del usuario. |
+| nombre          |`String`    |Nombre del usuario.              |
+| email           |`String`    |Correo electrónico del usuario.  |
+| telefono        |`String`    |Número de teléfono del usuario.  |
+| fechaRegistro   |`LocalDate` |Fecha de registro del usuario.   |
 #### Préstamo: 
 |columna          |Tipo        |Comentario                             |
 |-----------------|------------|---------------------------------------|
