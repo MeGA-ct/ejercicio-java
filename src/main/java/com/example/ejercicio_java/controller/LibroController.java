@@ -88,8 +88,6 @@ public class LibroController {
             LOGGER.info("LibroController.guardarLibro: error al guardar libro");
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-
     }
 
     @PutMapping(path = "/{id}")
