@@ -145,7 +145,7 @@ public class LibroServiceImpl implements LibroService {
             LOGGER.info("LibroServiceImpl.actualizarParcialmenteLibro: ISBN Duplicado");
             throw new LibroException(
                     LibroException.ISBN_DUPLICADO,
-                    String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, libro.getIsbn())
+                    String.format(LIBRO_ISBN_DUPLICADO_MENSAJE, updates.get("isbn").toString())
             );
         }
     }

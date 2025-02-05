@@ -178,7 +178,7 @@ class LibroServiceImplTest {
         LibroDTO unLibro = librosDto.get(indiceLista);
         Map<String, Object> nuevosDatos = new HashMap<>();
         nuevosDatos.put("titulo", "Nuevo Título");
-        nuevosDatos.put("isbn", "nuevo ISBN");
+        nuevosDatos.put("autor", "Nuevo Autor");
         nuevosDatos.put("fechaPublicacion", LocalDate.now().toString());
 
         when(libroRepository.findById(unLibro.getId())).thenReturn(Optional.of(librosDao.get(0)));
@@ -187,7 +187,7 @@ class LibroServiceImplTest {
         LibroDTO resultado = libroService.actualizarParcialmenteLibro(unLibro.getId(), nuevosDatos);
 
         assertEquals(nuevosDatos.get("titulo"), resultado.getTitulo());
-        assertEquals(nuevosDatos.get("isbn"), resultado.getIsbn());
+        assertEquals(nuevosDatos.get("autor"), resultado.getAutor());
         assertEquals(nuevosDatos.get("fechaPublicacion"), resultado.getFechaPublicacion().toString());
     }
 
@@ -196,7 +196,7 @@ class LibroServiceImplTest {
         LibroDTO unLibro = librosDto.get(0);
         Long libroId = unLibro.getId();
         Map<String, Object> nuevosDatos = new HashMap<>();
-        nuevosDatos.put("titulo", "Nuevo Título");
+
 
         when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
@@ -213,7 +213,7 @@ class LibroServiceImplTest {
         LibroDTO unLibro = librosDto.get(0);
         Long libroId = unLibro.getId();
         Map<String, Object> nuevosDatos = new HashMap<>();
-        nuevosDatos.put("autor", "Nuevo Autor");
+        nuevosDatos.put("isbn", "isbn 1");
 
         when(libroRepository.findById(unLibro.getId())).thenReturn(Optional.of(librosDao.get(0)));
         when(libroRepository.save(any(LibroDAO.class)))

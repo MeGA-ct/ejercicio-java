@@ -1,8 +1,8 @@
 package com.example.ejercicio_java.controller;
 
-import com.example.ejercicio_java.dto.LibroDTO;
-import com.example.ejercicio_java.exceptions.libro.LibroException;
-import com.example.ejercicio_java.service.LibroService;
+import com.example.ejercicio_java.dto.UsuarioDTO;
+import com.example.ejercicio_java.exceptions.usuario.UsuarioException;
+import com.example.ejercicio_java.service.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,155 +40,155 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(LibroController.class)
+@WebMvcTest(UsuarioController.class)
 class UsuarioControllerTest {
 
     @Autowired
     private MockMvc mockMvcC;
 
     @MockBean
-    private LibroService libroService;
+    private UsuarioService usuarioService;
 
-    private final List<LibroDTO> libros = new ArrayList<>();
+    private final List<UsuarioDTO> usuarios = new ArrayList<>();
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
 
         for (int i = 1; i <= 2; i++) {
-            LibroDTO libro = new LibroDTO(
+            UsuarioDTO usuario = new UsuarioDTO(
                     (long) i,
-                    "Libro " + i,
-                    "Autor " + i,
-                    "isbn " + i,
-                    LocalDate.now().plusDays(i)
+                    "Nombre " + i,
+                    "email" + i + "@mail.com",
+                    "90090090" + i,
+                    LocalDate.now().minusDays(i)
             );
-            libros.add(libro);
+            usuarios.add(usuario);
         }
     }
 
     @Test
     void testObtenerLibros() throws Exception {
-        when(libroService.obtenerLibros()).thenReturn(libros);
+        when(usuarioService.obtenerUsuarios()).thenReturn(usuarios);
 
-        mockMvcC.perform(get("/libros").contentType(MediaType.APPLICATION_JSON))
+        mockMvcC.perform(get("/usuarios").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(libros.get(0).getId().intValue())))
-                .andExpect(jsonPath("$[0].titulo", is(libros.get(0).getTitulo())))
-                .andExpect(jsonPath("$[0].autor", is(libros.get(0).getAutor())))
-                .andExpect(jsonPath("$[0].isbn", is(libros.get(0).getIsbn())))
-                .andExpect(jsonPath("$[1].id", is(libros.get(1).getId().intValue())))
-                .andExpect(jsonPath("$[1].titulo", is(libros.get(1).getTitulo())))
-                .andExpect(jsonPath("$[1].autor", is(libros.get(1).getAutor())))
-                .andExpect(jsonPath("$[1].isbn", is(libros.get(1).getIsbn())));
+                .andExpect(jsonPath("$[0].id", is(usuarios.get(0).getId().intValue())))
+                .andExpect(jsonPath("$[0].nombre", is(usuarios.get(0).getNombre())))
+                .andExpect(jsonPath("$[0].email", is(usuarios.get(0).getEmail())))
+                .andExpect(jsonPath("$[0].telefono", is(usuarios.get(0).getTelefono())))
+                .andExpect(jsonPath("$[1].id", is(usuarios.get(1).getId().intValue())))
+                .andExpect(jsonPath("$[1].nombre", is(usuarios.get(1).getNombre())))
+                .andExpect(jsonPath("$[1].email", is(usuarios.get(1).getEmail())))
+                .andExpect(jsonPath("$[1].telefono", is(usuarios.get(1).getTelefono())));
 
-        verify(libroService, times(1)).obtenerLibros();
+        verify(usuarioService, times(1)).obtenerUsuarios();
     }
 
     @Test
     void testObtenerUnLibro() throws Exception {
-        when(libroService.obtenerUnLibro(any(Long.class))).thenReturn(libros.get(0));
-        mockMvcC.perform(get("/libros/0").contentType(MediaType.APPLICATION_JSON))
+        when(usuarioService.obtenerUnUsuario(any(Long.class))).thenReturn(usuarios.get(0));
+        mockMvcC.perform(get("/usuarios/0").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(libros.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.titulo", is(libros.get(0).getTitulo())))
-                .andExpect(jsonPath("$.autor", is(libros.get(0).getAutor())))
-                .andExpect(jsonPath("$.isbn", is(libros.get(0).getIsbn())));
+                .andExpect(jsonPath("$.id", is(usuarios.get(0).getId().intValue())))
+                .andExpect(jsonPath("$.nombre", is(usuarios.get(0).getNombre())))
+                .andExpect(jsonPath("$.email", is(usuarios.get(0).getEmail())))
+                .andExpect(jsonPath("$.telefono", is(usuarios.get(0).getTelefono())));
     }
 
     @Test
     void testObtenerUnLibroNotFound() throws Exception {
-        when(libroService.obtenerUnLibro(any(Long.class))).thenThrow(LibroException.class);
-        mockMvcC.perform(get("/libros/0").contentType(MediaType.APPLICATION_JSON))
+        when(usuarioService.obtenerUnUsuario(any(Long.class))).thenThrow(UsuarioException.class);
+        mockMvcC.perform(get("/usuarios/0").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void testGuardarLibro() throws Exception {
-        when(libroService.guardarLibro(any(LibroDTO.class))).thenReturn(libros.get(0));
+        when(usuarioService.guardarUsuario(any(UsuarioDTO.class))).thenReturn(usuarios.get(0));
         mockMvcC.perform(
-                        post("/libros")
+                        post("/usuarios")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         "{" +
-                                        " \"titulo\":\"" + libros.get(0).getTitulo() + "\"," +
-                                        " \"autor\":\"" + libros.get(0).getAutor() + "\"," +
-                                        " \"isbn\":\"" + libros.get(0).getIsbn() + "\"," +
-                                        " \"fechaPublicacion\":\"" + libros.get(0).getFechaPublicacion() + "\"" +
+                                        " \"nombre\":\"" + usuarios.get(0).getNombre() + "\"," +
+                                        " \"email\":\"" + usuarios.get(0).getEmail() + "\"," +
+                                        " \"telefono\":\"" + usuarios.get(0).getTelefono() + "\"," +
+                                        " \"fechaRegistro\":\"" + usuarios.get(0).getFechaRegistro() + "\"" +
                                         "}"
                                 )
                 )
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(libros.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.titulo", is(libros.get(0).getTitulo())))
-                .andExpect(jsonPath("$.autor", is(libros.get(0).getAutor())))
-                .andExpect(jsonPath("$.isbn", is(libros.get(0).getIsbn())));
+                .andExpect(jsonPath("$.id", is(usuarios.get(0).getId().intValue())))
+                .andExpect(jsonPath("$.nombre", is(usuarios.get(0).getNombre())))
+                .andExpect(jsonPath("$.email", is(usuarios.get(0).getEmail())))
+                .andExpect(jsonPath("$.telefono", is(usuarios.get(0).getTelefono())));
     }
 
     @Test
     void testGuardarLibroError() throws Exception {
-        when(libroService.guardarLibro(any(LibroDTO.class))).thenThrow(LibroException.class);
-        mockMvcC.perform(post("/libros").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        when(usuarioService.guardarUsuario(any(UsuarioDTO.class))).thenThrow(UsuarioException.class);
+        mockMvcC.perform(post("/usuarios").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void testActualizarLibro() throws Exception {
-        when(libroService.actualizarLibro(any(LibroDTO.class))).thenReturn(libros.get(0));
+        when(usuarioService.actualizarUsuario(any(UsuarioDTO.class))).thenReturn(usuarios.get(0));
         mockMvcC.perform(
-                        put("/libros/1")
+                        put("/usuarios/1")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(
                                         "{" +
-                                        " \"titulo\":\"" + libros.get(0).getTitulo() + "\"," +
-                                        " \"autor\":\"" + libros.get(0).getAutor() + "\"," +
-                                        " \"isbn\":\"" + libros.get(0).getIsbn() + "\"," +
-                                        " \"fechaPublicacion\":\"" + libros.get(0).getFechaPublicacion() + "\"" +
+                                        " \"nombre\":\"" + usuarios.get(0).getNombre() + "\"," +
+                                        " \"email\":\"" + usuarios.get(0).getEmail() + "\"," +
+                                        " \"telefono\":\"" + usuarios.get(0).getTelefono() + "\"," +
+                                        " \"fechaRegistro\":\"" + usuarios.get(0).getFechaRegistro() + "\"" +
                                         "}"
                                 )
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(libros.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.titulo", is(libros.get(0).getTitulo())))
-                .andExpect(jsonPath("$.autor", is(libros.get(0).getAutor())))
-                .andExpect(jsonPath("$.isbn", is(libros.get(0).getIsbn())));
+                .andExpect(jsonPath("$.id", is(usuarios.get(0).getId().intValue())))
+                .andExpect(jsonPath("$.nombre", is(usuarios.get(0).getNombre())))
+                .andExpect(jsonPath("$.email", is(usuarios.get(0).getEmail())))
+                .andExpect(jsonPath("$.telefono", is(usuarios.get(0).getTelefono())));
     }
 
     @Test
     void testActualizarLibroError() throws Exception {
-        when(libroService.actualizarLibro(any(LibroDTO.class))).thenThrow(LibroException.class);
-        mockMvcC.perform(put("/libros/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        when(usuarioService.actualizarUsuario(any(UsuarioDTO.class))).thenThrow(UsuarioException.class);
+        mockMvcC.perform(put("/usuarios/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void testActualizarParcialmenteLibro() throws Exception {
         Map<String, Object> updates = new HashMap<>();
-        updates.put("titulo", "Nuevo Título");
-        updates.put("autor", "Nuevo Autor");
+        updates.put("nombre", "Nuevo Título");
+        updates.put("email", "Nuevo Autor");
 
-        when(libroService.actualizarParcialmenteLibro(any(Long.class), anyMap())).thenReturn(libros.get(0));
-        mockMvcC.perform(patch("/libros/1")
+        when(usuarioService.actualizarParcialmenteUsuario(any(Long.class), anyMap())).thenReturn(usuarios.get(0));
+        mockMvcC.perform(patch("/usuarios/1")
                                  .contentType(MediaType.APPLICATION_JSON)
                                  .content(new ObjectMapper().writeValueAsString(updates))
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(libros.get(0).getId().intValue())))
-                .andExpect(jsonPath("$.titulo", is(libros.get(0).getTitulo())))
-                .andExpect(jsonPath("$.autor", is(libros.get(0).getAutor())))
-                .andExpect(jsonPath("$.isbn", is(libros.get(0).getIsbn())));
+                .andExpect(jsonPath("$.id", is(usuarios.get(0).getId().intValue())))
+                .andExpect(jsonPath("$.nombre", is(usuarios.get(0).getNombre())))
+                .andExpect(jsonPath("$.email", is(usuarios.get(0).getEmail())))
+                .andExpect(jsonPath("$.telefono", is(usuarios.get(0).getTelefono())));
     }
 
     @Test
     void testActualizarParcialmenteLibroError() throws Exception {
-        when(libroService.actualizarParcialmenteLibro(any(Long.class), anyMap())).thenThrow(LibroException.class);
-        mockMvcC.perform(patch("/libros/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
+        when(usuarioService.actualizarParcialmenteUsuario(any(Long.class), anyMap())).thenThrow(UsuarioException.class);
+        mockMvcC.perform(patch("/usuarios/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -196,13 +196,12 @@ class UsuarioControllerTest {
     void testBorrarLibro() throws Exception {
         Long libroId = 1L;
 
-        doNothing().when(libroService).borrarLibro(libroId);
+        doNothing().when(usuarioService).borrarUsuario(libroId);
 
-        mockMvcC.perform(delete("/libros/{id}", libroId)
-                                .contentType(MediaType.APPLICATION_JSON))
-               .andExpect(status().isNoContent());
+        mockMvcC.perform(delete("/usuarios/{id}", libroId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
-        verify(libroService, times(1)).borrarLibro(libroId);
+        verify(usuarioService, times(1)).borrarUsuario(libroId);
     }
 
     @Test
@@ -210,9 +209,11 @@ class UsuarioControllerTest {
         Long libroId = 9L;
         String mensajeError = "Libro no encontrado";
 
-        doThrow(new LibroException(501, mensajeError)).when(libroService).borrarLibro(libroId);
+        doThrow(new UsuarioException(UsuarioException.NO_ENCONTRADO, mensajeError))
+                .when(usuarioService)
+                .borrarUsuario(libroId);
 
-        mockMvcC.perform(delete("/libros/9").contentType(MediaType.APPLICATION_JSON))
+        mockMvcC.perform(delete("/usuarios/9").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
 
     }

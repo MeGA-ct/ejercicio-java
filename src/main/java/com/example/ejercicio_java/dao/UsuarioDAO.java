@@ -16,6 +16,10 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "usuario")
 public class UsuarioDAO {
+    public static final String C_NOMBRE = "nombre";
+    public static final String C_EMAIL = "email";
+    public static final String C_TELEFONO = "telefono";
+    public static final String C_FECHA_REGISTRO = "fechaRegistro";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

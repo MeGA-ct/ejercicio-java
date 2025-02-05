@@ -15,10 +15,10 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 - :heavy_check_mark::x:DELETE /libros/{id}: Eliminar un libro por su ID.
 ##### Entidad: Usuario
 - :heavy_check_mark::blue_book:GET /usuarios: Obtener la lista de todos los usuarios.
-- :blue_book:GET /usuarios/{id}: Obtener los detalles de un usuario específico por su ID.
-- :green_book:POST /usuarios: Crear un nuevo usuario.
-- :ledger:PUT /usuarios/{id}: Actualizar los detalles de un usuario existente por su ID.
-- :notebook:PATCH /usuarios/{id}: Actualizar parcialmente los detalles de un usuario existente por su ID.
+- :heavy_check_mark::blue_book:GET /usuarios/{id}: Obtener los detalles de un usuario específico por su ID.
+- :heavy_check_mark::green_book:POST /usuarios: Crear un nuevo usuario.
+- :heavy_check_mark::ledger:PUT /usuarios/{id}: Actualizar los detalles de un usuario existente por su ID.
+- :heavy_check_mark::notebook:PATCH /usuarios/{id}: Actualizar parcialmente los detalles de un usuario existente por su ID.
 - :heavy_check_mark::x:DELETE /usuarios/{id}: Eliminar un usuario por su ID.
 ##### Entidad: Préstamo
 - :blue_book:GET /prestamos: Obtener la lista de todos los préstamos.
