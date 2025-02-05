@@ -2,7 +2,7 @@ package com.example.ejercicio_java.service.impl;
 
 import com.example.ejercicio_java.dao.UsuarioDAO;
 import com.example.ejercicio_java.dto.UsuarioDTO;
-import com.example.ejercicio_java.exceptions.libro.LibroException;
+import com.example.ejercicio_java.exceptions.usuario.UsuarioException;
 import com.example.ejercicio_java.mapper.UsuarioMapper;
 import com.example.ejercicio_java.repository.UsuarioRepository;
 import com.example.ejercicio_java.service.UsuarioService;
@@ -33,19 +33,27 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public List<UsuarioDTO> obtenerUsuarios() {
-        LOGGER.info("LibroServiceImpl.obtenerLibros: obteniendo todos los libros");
+        LOGGER.info("UsuarioServiceImpl.obtenerUsuarios: obteniendo todos los usuarios");
 
         List<UsuarioDAO> usuarios = usuarioRepository.findAll();
 
-        List<UsuarioDTO> resultado = usuarioMapper.usuariosDaoToUsuariosDto(usuarios);
-
-        LOGGER.info("LibroServiceImpl.obtenerLibros: se han obtenido {} libros.", resultado.size());
-        return resultado;
+        LOGGER.info("UsuarioServiceImpl.obtenerUsuarios: se han obtenido {} usuarios.", usuarios.size());
+        return usuarioMapper.usuariosDaoToUsuariosDto(usuarios);
     }
 
     @Override
     public UsuarioDTO obtenerUnUsuario(Long usuarioId) {
-        return null;
+        LOGGER.info("UsuarioServiceImpl.obtenerUnUsuario: obteniendo un usuario");
+
+        UsuarioDAO usuarioDAO = usuarioRepository.findById(usuarioId).orElseThrow(
+                () -> new UsuarioException(
+                        UsuarioException.NO_ENCONTRADO,
+                        String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId)
+                ));
+
+        LOGGER.info("UsuarioServiceImpl.obtenerUnUsuario: usuario con email {} obtenido", usuarioDAO.getEmail());
+
+        return usuarioMapper.usuarioDaoToUsuarioDto(usuarioDAO);
     }
 
     @Override
@@ -65,13 +73,16 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     @Override
     public Void borrarUsuario(Long usuarioId) {
-        LOGGER.info("LibroServiceImpl.borrarLibro: borrando el libro con id {}", usuarioId);
+        LOGGER.info("UsuarioServiceImpl.borrarUsuario: borrando el libro con id {}", usuarioId);
 
         usuarioRepository.delete(
                 usuarioRepository.findById(usuarioId).orElseThrow(
-                        () -> new LibroException(500, String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId))
+                        () -> new UsuarioException(
+                                UsuarioException.NO_ENCONTRADO,
+                                String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId)
+                        )
                 ));
-        LOGGER.info("LibroServiceImpl.borrarLibro: se ha borrado libro con id {}", usuarioId);
+        LOGGER.info("UsuarioServiceImpl.borrarUsuario: se ha borrado libro con id {}", usuarioId);
         return null;
     }
 }

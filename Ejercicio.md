@@ -7,19 +7,19 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 - Implementar un API REST que soporte los verbos HTTP: :blue_book:GET, :green_book:POST, :ledger:PUT, :notebook:PATCH y :x:DELETE para gestionar libros, usuarios y préstamos.
 #### Endpoints a implementar:
 ##### Entidad: Libro
-- :blue_book:GET /libros: Obtener la lista de todos los libros.
-- :blue_book:GET /libros/{id}: Obtener los detalles de un libro específico por su ID.
-- :green_book:POST /libros: Crear un nuevo libro.
-- :ledger:PUT /libros/{id}: Actualizar los detalles de un libro existente por su ID.
-- :notebook:PATCH /libros/{id}: Actualizar parcialmente los detalles de un libro existente por su ID.
-- :x:DELETE /libros/{id}: Eliminar un libro por su ID.
+- :heavy_check_mark::blue_book:GET /libros: Obtener la lista de todos los libros.
+- :heavy_check_mark::blue_book:GET /libros/{id}: Obtener los detalles de un libro específico por su ID.
+- :heavy_check_mark::green_book:POST /libros: Crear un nuevo libro.
+- :heavy_check_mark::ledger:PUT /libros/{id}: Actualizar los detalles de un libro existente por su ID.
+- :heavy_check_mark::notebook:PATCH /libros/{id}: Actualizar parcialmente los detalles de un libro existente por su ID.
+- :heavy_check_mark::x:DELETE /libros/{id}: Eliminar un libro por su ID.
 ##### Entidad: Usuario
-- :blue_book:GET /usuarios: Obtener la lista de todos los usuarios.
+- :heavy_check_mark::blue_book:GET /usuarios: Obtener la lista de todos los usuarios.
 - :blue_book:GET /usuarios/{id}: Obtener los detalles de un usuario específico por su ID.
 - :green_book:POST /usuarios: Crear un nuevo usuario.
 - :ledger:PUT /usuarios/{id}: Actualizar los detalles de un usuario existente por su ID.
 - :notebook:PATCH /usuarios/{id}: Actualizar parcialmente los detalles de un usuario existente por su ID.
-- :x:DELETE /usuarios/{id}: Eliminar un usuario por su ID.
+- :heavy_check_mark::x:DELETE /usuarios/{id}: Eliminar un usuario por su ID.
 ##### Entidad: Préstamo
 - :blue_book:GET /prestamos: Obtener la lista de todos los préstamos.
 - :blue_book:GET /prestamos/{id}: Obtener los detalles de un préstamo específico por su ID.
@@ -32,7 +32,7 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 - Utilizar repositorios JPA para la interacción con la base de datos.
 ### 3. Modelo de Datos:
 - Diseñar un modelo de datos que incluya al menos 3 entidades relacionadas: Libro, Usuario y Préstamo.
-#### Libro:
+#### Libro::heavy_check_mark:
 |columna          |Tipo        |Comentario                     |
 |-----------------|------------|-------------------------------|
 |id               |`Long`      |Identificador único del libro. |
@@ -40,7 +40,7 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 |autor            |`String`    |Autor del libro.               |
 |isbn             |`String`    |Código ISBN del libro          |
 |fechaPublicacion |`LocalDate` |Fecha de publicación del libro.|
-#### Usuario:
+#### Usuario::heavy_check_mark:
 | columna         |Tipo        |Comentario                       |
 |-----------------|------------|---------------------------------|
 | id              |`Long`      |Identificador único del usuario. |

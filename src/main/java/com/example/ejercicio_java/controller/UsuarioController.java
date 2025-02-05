@@ -1,19 +1,26 @@
 package com.example.ejercicio_java.controller;
 
+import com.example.ejercicio_java.controller.request.UsuarioBody;
 import com.example.ejercicio_java.dto.UsuarioDTO;
 import com.example.ejercicio_java.exceptions.usuario.UsuarioException;
 import com.example.ejercicio_java.service.UsuarioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = "/usuarios")
@@ -40,97 +47,92 @@ public class UsuarioController {
         return ResponseEntity.ok(resultado);
     }
 
-    /**TODO: @GetMapping(path = "/{id}") 
-    public ResponseEntity<Object> obtenerUnLibro(@PathVariable("id") Long libroId) {
-        LOGGER.info("UsuarioController.obtenerUnLibro: obteniendo todos los libros");
+    @GetMapping(path = "/{id}")
+    public ResponseEntity<Object> obtenerUnUsuario(@PathVariable("id") Long libroId) {
+        LOGGER.info("UsuarioController.obtenerUnUsuario: obteniendo un usuario");
 
         try {
-            LibroDTO resultado = usuarioService.obtenerUnLibro(libroId);
-            LOGGER.info(
-                    "UsuarioController.obtenerUnLibro: se ha obtenido el libro {} del autor {}.",
-                    resultado.getTitulo(),
-                    resultado.getAutor()
-            );
+            UsuarioDTO resultado = usuarioService.obtenerUnUsuario(libroId);
+
+            LOGGER.info("UsuarioController.obtenerUnUsuario: usuario {} encontrado", resultado.getEmail());
+
             return ResponseEntity.ok(resultado);
-        } catch (LibroException e) {
-            LOGGER.info("UsuarioController.obtenerUnLibro: error al obtener libro con id {}.", libroId);
+        } catch (UsuarioException e) {
+            LOGGER.info("UsuarioController.obtenerUnUsuario: error al obtener usuario con id {}.", libroId);
+
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /*@PostMapping
-    public ResponseEntity<Object> guardarLibro(@RequestBody LibroBody libro) {
-        LOGGER.info("UsuarioController.guardarLibro: guardando un nuevo libro");
+    @PostMapping
+    public ResponseEntity<Object> guardarUsuario(@RequestBody UsuarioBody libro) {
+        LOGGER.info("UsuarioController.guardarUsuario: guardando un nuevo libro");
+
+        UsuarioDTO libroDTO = new UsuarioDTO(
+                null,
+                libro.nombre(),
+                libro.email(),
+                libro.telefono(),
+                libro.fechaRegistro()
+        );
+
         try {
-            LibroDTO libroDTO = new LibroDTO(
-                    null,
-                    libro.titulo(),
-                    libro.autor(),
-                    libro.isbn(),
-                    libro.fechaPublicacion()
-            );
-            LibroDTO resultado = usuarioService.guardarLibro(libroDTO);
-            LOGGER.info(
-                    "UsuarioController.guardarLibro: se ha guardado el libro {} del autor {} con id {}",
-                    resultado.getTitulo(),
-                    resultado.getAutor(),
-                    resultado.getId()
-            );
+            UsuarioDTO resultado = usuarioService.guardarUsuario(libroDTO);
+
+            LOGGER.info("UsuarioController.guardarUsuario: creado el usuario con id {}", resultado.getId());
+
             return ResponseEntity.status(HttpStatus.CREATED).body(resultado);
-        } catch (LibroException e) {
-            LOGGER.info("UsuarioController.guardarLibro: error al guardar libro");
+        } catch (UsuarioException e) {
+            LOGGER.info("UsuarioController.guardarUsuario: error al crear usuario");
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /*@PutMapping(path = "/{id}")
-    public ResponseEntity<Object> actualizarLibro(
-            @PathVariable("id") Long libroId,
-            @RequestBody LibroBody libro
+    @PutMapping(path = "/{id}")
+    public ResponseEntity<Object> actualizarUsuario(
+            @PathVariable("id") Long usuarioId,
+            @RequestBody UsuarioBody libro
     ) {
-        LOGGER.info("UsuarioController.actualizarLibro: actualizando el libro con id {}", libroId);
-        LibroDTO libroDTO = new LibroDTO(
-                libroId,
-                libro.titulo(),
-                libro.autor(),
-                libro.isbn(),
-                libro.fechaPublicacion()
+        LOGGER.info("UsuarioController.actualizarUsuario: actualizando usuario {}", usuarioId);
+        UsuarioDTO libroDTO = new UsuarioDTO(
+                usuarioId,
+                libro.nombre(),
+                libro.email(),
+                libro.telefono(),
+                libro.fechaRegistro()
         );
         try {
-            LibroDTO resultado = usuarioService.actualizarLibro(libroDTO);
-            LOGGER.info(
-                    "UsuarioController.actualizarLibro: se ha actualizado el libro {} del autor {}.",
-                    resultado.getTitulo(),
-                    resultado.getAutor()
-            );
+            UsuarioDTO resultado = usuarioService.actualizarUsuario(libroDTO);
+
+            LOGGER.info("UsuarioController.actualizarUsuario: modificado el usuario con id {}", resultado.getId());
             return ResponseEntity.ok(resultado);
-        } catch (LibroException e) {
-            LOGGER.info("UsuarioController.actualizarLibro: error al modificar libro con id {}", libroId);
+        } catch (UsuarioException e) {
+            LOGGER.info("UsuarioController.actualizarUsuario: error al modificar libro con id {}", usuarioId);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    /*@PatchMapping(path = "/{id}")
-    public ResponseEntity<Object> actualizarParcialmenteLibro(
-            @PathVariable("id") Long libroId,
+    @PatchMapping(path = "/{id}")
+    public ResponseEntity<Object> actualizarParcialmenteUsuario(
+            @PathVariable("id") Long usuarioId,
             @RequestBody Map<String, Object> updates
     ) {
         LOGGER.info(
-                "UsuarioController.actualizarParcialmenteLibro: actualizando parcialmente el libro con id {}",
-                libroId
+                "UsuarioController.actualizarParcialmenteUsuario: actualización parcial del usuario {}",
+                usuarioId
         );
         try {
-            LibroDTO resultado = usuarioService.actualizarParcialmenteLibro(libroId, updates);
+            UsuarioDTO resultado = usuarioService.actualizarParcialmenteUsuario(usuarioId, updates);
             LOGGER.info(
-                    "UsuarioController.actualizarParcialmenteLibro: se ha actualizado parcialmente libro con id {}",
+                    "UsuarioController.actualizarParcialmenteUsuario: actualizado parcialmente el usuario {}",
                     resultado.getId()
             );
             return ResponseEntity.ok(resultado);
-        } catch (LibroException e) {
-            LOGGER.info("UsuarioController.actualizarParcialmenteLibro: error al modificar libro con id {}", libroId);
+        } catch (UsuarioException e) {
+            LOGGER.info("UsuarioController.actualizarParcialmenteUsuario: error al modificar usuario {}", usuarioId);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }*/
+    }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<String> borrarUsuario(

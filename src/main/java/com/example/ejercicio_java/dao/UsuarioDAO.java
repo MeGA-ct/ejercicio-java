@@ -27,7 +27,7 @@ public class UsuarioDAO {
     @Column(nullable = false, length = 100, unique = true)
     private String email;
 
-    @Column(nullable = false, length = 13, unique = true)
+    @Column(nullable = false, length = 13)
     private String telefono;
 
     @Column(name = "fecha_registro")
