@@ -68,14 +68,14 @@ public class LibroController {
     @PostMapping
     public ResponseEntity<Object> guardarLibro(@RequestBody LibroBody libro) {
         LOGGER.info("LibroController.guardarLibro: guardando un nuevo libro");
+        LibroDTO libroDTO = new LibroDTO(
+                null,
+                libro.titulo(),
+                libro.autor(),
+                libro.isbn(),
+                libro.fechaPublicacion()
+        );
         try {
-            LibroDTO libroDTO = new LibroDTO(
-                    null,
-                    libro.titulo(),
-                    libro.autor(),
-                    libro.isbn(),
-                    libro.fechaPublicacion()
-            );
             LibroDTO resultado = libroService.guardarLibro(libroDTO);
             LOGGER.info(
                     "LibroController.guardarLibro: se ha guardado el libro {} del autor {} con id {}",
