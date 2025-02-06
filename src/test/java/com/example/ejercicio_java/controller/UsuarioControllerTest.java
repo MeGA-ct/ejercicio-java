@@ -68,7 +68,7 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testObtenerLibros() throws Exception {
+    void testObtenerUsuarios() throws Exception {
         when(usuarioService.obtenerUsuarios()).thenReturn(usuarios);
 
         mockMvcC.perform(get("/usuarios").contentType(MediaType.APPLICATION_JSON))
@@ -88,7 +88,7 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testObtenerUnLibro() throws Exception {
+    void testObtenerUnUsuario() throws Exception {
         when(usuarioService.obtenerUnUsuario(any(Long.class))).thenReturn(usuarios.get(0));
         mockMvcC.perform(get("/usuarios/0").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -100,14 +100,14 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testObtenerUnLibroNotFound() throws Exception {
+    void testObtenerUnUsuarioNotFound() throws Exception {
         when(usuarioService.obtenerUnUsuario(any(Long.class))).thenThrow(UsuarioException.class);
         mockMvcC.perform(get("/usuarios/0").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testGuardarLibro() throws Exception {
+    void testGuardarUsuario() throws Exception {
         when(usuarioService.guardarUsuario(any(UsuarioDTO.class))).thenReturn(usuarios.get(0));
         mockMvcC.perform(
                         post("/usuarios")
@@ -130,14 +130,14 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testGuardarLibroError() throws Exception {
+    void testGuardarUsuarioError() throws Exception {
         when(usuarioService.guardarUsuario(any(UsuarioDTO.class))).thenThrow(UsuarioException.class);
         mockMvcC.perform(post("/usuarios").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testActualizarLibro() throws Exception {
+    void testActualizarUsuario() throws Exception {
         when(usuarioService.actualizarUsuario(any(UsuarioDTO.class))).thenReturn(usuarios.get(0));
         mockMvcC.perform(
                         put("/usuarios/1")
@@ -160,14 +160,14 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testActualizarLibroError() throws Exception {
+    void testActualizarUsuarioError() throws Exception {
         when(usuarioService.actualizarUsuario(any(UsuarioDTO.class))).thenThrow(UsuarioException.class);
         mockMvcC.perform(put("/usuarios/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testActualizarParcialmenteLibro() throws Exception {
+    void testActualizarParcialmenteUsuario() throws Exception {
         Map<String, Object> updates = new HashMap<>();
         updates.put("nombre", "Nuevo Título");
         updates.put("email", "Nuevo Autor");
@@ -186,32 +186,32 @@ class UsuarioControllerTest {
     }
 
     @Test
-    void testActualizarParcialmenteLibroError() throws Exception {
+    void testActualizarParcialmenteUsuarioError() throws Exception {
         when(usuarioService.actualizarParcialmenteUsuario(any(Long.class), anyMap())).thenThrow(UsuarioException.class);
         mockMvcC.perform(patch("/usuarios/9").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testBorrarLibro() throws Exception {
-        Long libroId = 1L;
+    void testBorrarUsuario() throws Exception {
+        Long usuarioId = 1L;
 
-        doNothing().when(usuarioService).borrarUsuario(libroId);
+        doNothing().when(usuarioService).borrarUsuario(usuarioId);
 
-        mockMvcC.perform(delete("/usuarios/{id}", libroId).contentType(MediaType.APPLICATION_JSON))
+        mockMvcC.perform(delete("/usuarios/{id}", usuarioId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
-        verify(usuarioService, times(1)).borrarUsuario(libroId);
+        verify(usuarioService, times(1)).borrarUsuario(usuarioId);
     }
 
     @Test
-    void testBorrarLibroError() throws Exception {
-        Long libroId = 9L;
-        String mensajeError = "Libro no encontrado";
+    void testBorrarUsuarioError() throws Exception {
+        Long usuarioId = 9L;
+        String mensajeError = "Usuario no encontrado";
 
         doThrow(new UsuarioException(UsuarioException.NO_ENCONTRADO, mensajeError))
                 .when(usuarioService)
-                .borrarUsuario(libroId);
+                .borrarUsuario(usuarioId);
 
         mockMvcC.perform(delete("/usuarios/9").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

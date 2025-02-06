@@ -21,41 +21,41 @@ La Biblioteca Municipal de Yuncos ha decidido modernizar su sistema de gestión 
 - :heavy_check_mark::notebook:PATCH /usuarios/{id}: Actualizar parcialmente los detalles de un usuario existente por su ID.
 - :heavy_check_mark::x:DELETE /usuarios/{id}: Eliminar un usuario por su ID.
 ##### Entidad: Préstamo
-- :blue_book:GET /prestamos: Obtener la lista de todos los préstamos.
-- :blue_book:GET /prestamos/{id}: Obtener los detalles de un préstamo específico por su ID.
-- :green_book:POST /prestamos: Crear un nuevo préstamo.
+- :heavy_check_mark::blue_book:GET /prestamos: Obtener la lista de todos los préstamos.
+- :heavy_check_mark::blue_book:GET /prestamos/{id}: Obtener los detalles de un préstamo específico por su ID.
+- :heavy_check_mark::green_book:POST /prestamos: Crear un nuevo préstamo.
 - :ledger:PUT /prestamos/{id}: Actualizar los detalles de un préstamo existente por su ID.
 - :notebook:PATCH /prestamos/{id}: Actualizar parcialmente los detalles de un préstamo existente por su ID.
-- :x:DELETE /prestamos/{id}: Eliminar un préstamo por su ID.
+- :heavy_check_mark::x:DELETE /prestamos/{id}: Eliminar un préstamo por su ID.
 ### 2. Capa de Servicio y Repositorios JPA:
 - Crear una capa de servicio que gestione la lógica de negocio.
 - Utilizar repositorios JPA para la interacción con la base de datos.
 ### 3. Modelo de Datos:
 - Diseñar un modelo de datos que incluya al menos 3 entidades relacionadas: Libro, Usuario y Préstamo.
-#### Libro::heavy_check_mark:
-|columna          |Tipo        |Comentario                     |
-|-----------------|------------|-------------------------------|
-|id               |`Long`      |Identificador único del libro. |
-|titulo           |`String`    |Título del libro.              |
-|autor            |`String`    |Autor del libro.               |
-|isbn             |`String`    |Código ISBN del libro          |
-|fechaPublicacion |`LocalDate` |Fecha de publicación del libro.|
-#### Usuario::heavy_check_mark:
-| columna         |Tipo        |Comentario                       |
-|-----------------|------------|---------------------------------|
-| id              |`Long`      |Identificador único del usuario. |
-| nombre          |`String`    |Nombre del usuario.              |
-| email           |`String`    |Correo electrónico del usuario.  |
-| telefono        |`String`    |Número de teléfono del usuario.  |
-| fechaRegistro   |`LocalDate` |Fecha de registro del usuario.   |
-#### Préstamo: 
-|columna          |Tipo        |Comentario                             |
-|-----------------|------------|---------------------------------------|
-|id               |`Long`      |Identificador único del préstamo.      |
-|libro            |`Libro`     |Libro prestado.                        |
-|usuario          |`Usuario`   |Usuario que realiza el préstamo.       |
-|fechaPrestamo    |`LocalDate` |Fecha en que se realizó el préstamo.   |
-|fechaDevolucion  |`LocalDate` |Fecha en que se debe devolver el libro.|
+#### Libro: :heavy_check_mark:
+| columna          | Tipo        | Comentario                      |
+|------------------|-------------|---------------------------------|
+| id               | `Long`      | Identificador único del libro.  |
+| titulo           | `String`    | Título del libro.               |
+| autor            | `String`    | Autor del libro.                |
+| isbn             | `String`    | Código ISBN del libro           |
+| fechaPublicacion | `LocalDate` | Fecha de publicación del libro. |
+#### Usuario: :heavy_check_mark:
+| columna       | Tipo        | Comentario                       |
+|---------------|-------------|----------------------------------|
+| id            | `Long`      | Identificador único del usuario. |
+| nombre        | `String`    | Nombre del usuario.              |
+| email         | `String`    | Correo electrónico del usuario.  |
+| telefono      | `String`    | Número de teléfono del usuario.  |
+| fechaRegistro | `LocalDate` | Fecha de registro del usuario.   |
+#### Préstamo: :heavy_check_mark:
+| columna         | Tipo        | Comentario                              |
+|-----------------|-------------|-----------------------------------------|
+| id              | `Long`      | Identificador único del préstamo.       |
+| libro           | `Libro`     | Libro prestado.                         |
+| usuario         | `Usuario`   | Usuario que realiza el préstamo.        |
+| fechaPrestamo   | `LocalDate` | Fecha en que se realizó el préstamo.    |
+| fechaDevolucion | `LocalDate` | Fecha en que se debe devolver el libro. |
 ### 4. Módulos de Spring Boot:
 - Utilizar los módulos de Spring Boot, Spring Data JPA y Spring Web.
 ### 5. Base de Datos en Memoria:
