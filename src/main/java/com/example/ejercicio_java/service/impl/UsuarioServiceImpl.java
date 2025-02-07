@@ -21,6 +21,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     public static final String USUARIO_NO_ENCONTRADO_MENSAJE = "El usuario con id[%d] no encontrado";
     public static final String USUARIO_EMAIL_DUPLICADO_MENSAJE = "Email [%S] ya está en uso";
+    public static final String USUARIO_CON_PRESTAMOS_MENSAJE = "El usuario con id[%d] tiene préstamos";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(UsuarioServiceImpl.class);
 
@@ -144,14 +145,22 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Void borrarUsuario(Long usuarioId) {
         LOGGER.info("UsuarioServiceImpl.borrarUsuario: borrando el libro con id {}", usuarioId);
 
-        usuarioRepository.delete(
-                usuarioRepository.findById(usuarioId).orElseThrow(
-                        () -> new UsuarioException(
-                                UsuarioException.NO_ENCONTRADO,
-                                String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId)
-                        )
-                ));
-        LOGGER.info("UsuarioServiceImpl.borrarUsuario: se ha borrado libro con id {}", usuarioId);
+        try {
+            usuarioRepository.delete(
+                    usuarioRepository.findById(usuarioId).orElseThrow(
+                            () -> new UsuarioException(
+                                    UsuarioException.NO_ENCONTRADO,
+                                    String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId)
+                            )
+                    ));
+            LOGGER.info("UsuarioServiceImpl.borrarUsuario: se ha borrado libro con id {}", usuarioId);
+        } catch (DataIntegrityViolationException e) {
+            throw new UsuarioException(
+                    UsuarioException.TIENE_PRESTAMOS,
+                    String.format(USUARIO_CON_PRESTAMOS_MENSAJE, usuarioId)
+            );
+        }
+
         return null;
     }
 }

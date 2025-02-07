@@ -21,6 +21,7 @@ public class LibroServiceImpl implements LibroService {
 
     public static final String LIBRO_NO_ENCONTRADO_MENSAJE = "El libro con id[%d] no encontrado";
     public static final String LIBRO_ISBN_DUPLICADO_MENSAJE = "ISBN [%S] ya introducido en otro libro";
+    public static final String LIBRO_EN_PRESTAMO_MENSAJE = "El libro con [%S] tiene prestamos";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(LibroServiceImpl.class);
 
@@ -151,16 +152,24 @@ public class LibroServiceImpl implements LibroService {
     }
 
     @Override
-    public Void borrarLibro(Long libroId) {
+    public Void borrarLibro(Long libroId) throws LibroException{
         LOGGER.info("LibroServiceImpl.borrarLibro: borrando el libro con id {}", libroId);
 
-        libroRepository.delete(
-                libroRepository.findById(libroId).orElseThrow(
-                        () -> new LibroException(
-                                LibroException.NO_ENCONTRADO,
-                                String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId)
-                        )
-                ));
+        try {
+            libroRepository.delete(
+                    libroRepository.findById(libroId).orElseThrow(
+                            () -> new LibroException(
+                                    LibroException.NO_ENCONTRADO,
+                                    String.format(LIBRO_NO_ENCONTRADO_MENSAJE, libroId)
+                            )
+                    ));
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.info("LibroServiceImpl.actualizarParcialmenteLibro: Libro existe en un préstamo");
+            throw new LibroException(
+                    LibroException.ESTA_EN_PRESTAMO,
+                    String.format(LIBRO_EN_PRESTAMO_MENSAJE, libroId)
+            );
+        }
         LOGGER.info("LibroServiceImpl.borrarLibro: se ha borrado libro con id {}", libroId);
         return null;
     }

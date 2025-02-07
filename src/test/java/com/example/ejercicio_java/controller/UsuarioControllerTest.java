@@ -217,5 +217,18 @@ class UsuarioControllerTest {
                 .andExpect(status().isBadRequest());
 
     }
+    @Test
+    void testBorrarUsuarioError_TienePrestamo() throws Exception {
+        Long usuarioId = usuarios.get(0).getId();
+        String mensajeError = "Usuario con prestamo";
+
+        doThrow(new UsuarioException(UsuarioException.TIENE_PRESTAMOS, mensajeError))
+                .when(usuarioService)
+                .borrarUsuario(usuarioId);
+
+        mockMvcC.perform(delete("/usuarios/"+usuarioId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+    }
 }
 

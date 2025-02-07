@@ -216,5 +216,19 @@ class LibroControllerTest {
                 .andExpect(status().isBadRequest());
 
     }
+
+        @Test
+    void testBorrarLibroError_TienePrestamo() throws Exception {
+        Long libroId = libros.get(0).getId();
+        String mensajeError = "Libro con prestamo";
+
+        doThrow(new LibroException(LibroException.ESTA_EN_PRESTAMO, mensajeError))
+                .when(libroService)
+                .borrarLibro(libroId);
+
+        mockMvcC.perform(delete("/libros/" + libroId).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+    }
 }
 

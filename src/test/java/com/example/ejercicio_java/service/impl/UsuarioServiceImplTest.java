@@ -18,12 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.example.ejercicio_java.service.impl.UsuarioServiceImpl.USUARIO_CON_PRESTAMOS_MENSAJE;
 import static com.example.ejercicio_java.service.impl.UsuarioServiceImpl.USUARIO_EMAIL_DUPLICADO_MENSAJE;
 import static com.example.ejercicio_java.service.impl.UsuarioServiceImpl.USUARIO_NO_ENCONTRADO_MENSAJE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -106,8 +108,6 @@ class UsuarioServiceImplTest {
 
     @Test
     void testObtenerUnUsuarioNotFound() {
-        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         UsuarioException exception = assertThrows(
                 UsuarioException.class, () -> usuarioService.obtenerUnUsuario(1L));
 
@@ -169,8 +169,6 @@ class UsuarioServiceImplTest {
     void testActualizarUsuarioNotFound() {
         UsuarioDTO unUsuario = usuariosDto.get(0);
 
-        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         UsuarioException exception = assertThrows(
                 UsuarioException.class,
                 () -> usuarioService.actualizarUsuario(unUsuario)
@@ -219,8 +217,6 @@ class UsuarioServiceImplTest {
         UsuarioDTO unUsuario = usuariosDto.get(0);
         Long usuarioId = unUsuario.getId();
         Map<String, Object> nuevosDatos = new HashMap<>();
-
-        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         UsuarioException exception = assertThrows(
                 UsuarioException.class,
@@ -272,13 +268,29 @@ class UsuarioServiceImplTest {
 
     @Test
     void testBorrarUsuarioNotFound() {
-        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         UsuarioException exception = assertThrows(
                 UsuarioException.class,
                 () -> usuarioService.borrarUsuario(1L)
         );
 
         assertEquals(errorUsuarioNoEncontrado.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void testBorrarLibroEnPrestamo() {
+        UsuarioDAO usuarioDAO = usuariosDao.get(0);
+        Long usuarioId = usuarioDAO.getId();
+        UsuarioException libroException = new UsuarioException(
+                UsuarioException.TIENE_PRESTAMOS,
+                String.format(USUARIO_CON_PRESTAMOS_MENSAJE, 1L)
+        );
+        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.of(usuarioDAO));
+        doThrow(new DataIntegrityViolationException("Usuario con préstamos"))
+                .when(usuarioRepository)
+                .delete(any(UsuarioDAO.class));
+
+        UsuarioException exception = assertThrows(UsuarioException.class, () -> usuarioService.borrarUsuario(usuarioId));
+
+        assertEquals(libroException.getMessage(), exception.getMessage());
     }
 }

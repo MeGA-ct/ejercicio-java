@@ -18,12 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.example.ejercicio_java.service.impl.LibroServiceImpl.LIBRO_EN_PRESTAMO_MENSAJE;
 import static com.example.ejercicio_java.service.impl.LibroServiceImpl.LIBRO_ISBN_DUPLICADO_MENSAJE;
 import static com.example.ejercicio_java.service.impl.LibroServiceImpl.LIBRO_NO_ENCONTRADO_MENSAJE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,8 +102,6 @@ class LibroServiceImplTest {
 
     @Test
     void testObtenerUnLibroNotFound() {
-        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         LibroException exception = assertThrows(LibroException.class, () -> libroService.obtenerUnLibro(1L));
 
         assertEquals(errorLibroNoEncontrado.getMessage(), exception.getMessage());
@@ -152,8 +152,6 @@ class LibroServiceImplTest {
     void testActualizarLibroNotFound() {
         LibroDTO unLibro = librosDto.get(0);
 
-        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         LibroException exception = assertThrows(LibroException.class, () -> libroService.actualizarLibro(unLibro));
 
         assertEquals(errorLibroNoEncontrado.getMessage(), exception.getMessage());
@@ -196,9 +194,6 @@ class LibroServiceImplTest {
         LibroDTO unLibro = librosDto.get(0);
         Long libroId = unLibro.getId();
         Map<String, Object> nuevosDatos = new HashMap<>();
-
-
-        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         LibroException exception = assertThrows(
                 LibroException.class,
@@ -244,10 +239,26 @@ class LibroServiceImplTest {
 
     @Test
     void testBorrarLibroNotFound() {
-        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         LibroException exception = assertThrows(LibroException.class, () -> libroService.borrarLibro(1L));
 
         assertEquals(errorLibroNoEncontrado.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void testBorrarLibroEnPrestamo() {
+        LibroDAO unLibroDao = librosDao.get(0);
+        Long libroId = unLibroDao.getId();
+        LibroException libroException = new LibroException(
+                LibroException.ESTA_EN_PRESTAMO,
+                String.format(LIBRO_EN_PRESTAMO_MENSAJE, 1L)
+        );
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.of(unLibroDao));
+        doThrow(new DataIntegrityViolationException("Libro en préstamo"))
+                .when(libroRepository)
+                .delete(any(LibroDAO.class));
+
+        LibroException exception = assertThrows(LibroException.class, () -> libroService.borrarLibro(libroId));
+
+        assertEquals(libroException.getMessage(), exception.getMessage());
     }
 }
