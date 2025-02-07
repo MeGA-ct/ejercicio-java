@@ -4,6 +4,7 @@ import com.example.ejercicio_java.dao.PrestamoDAO;
 import com.example.ejercicio_java.dto.PrestamoDTO;
 import com.example.ejercicio_java.exceptions.libro.LibroException;
 import com.example.ejercicio_java.exceptions.prestamo.PrestamoException;
+import com.example.ejercicio_java.exceptions.usuario.UsuarioException;
 import com.example.ejercicio_java.mapper.LibroMapper;
 import com.example.ejercicio_java.mapper.PrestamoMapper;
 import com.example.ejercicio_java.mapper.UsuarioMapper;
@@ -122,8 +123,8 @@ public class PrestamoServiceImpl implements PrestamoService {
             Long usuarioId = Long.valueOf(updates.get(PrestamoDAO.USUARIO_ID).toString());
             prestamo.setUsuario(
                     usuarioRepository.findById(usuarioId).orElseThrow(
-                            () -> new PrestamoException(
-                                    PrestamoException.NO_ENCONTRADO,
+                            () -> new UsuarioException(
+                                    UsuarioException.NO_ENCONTRADO,
                                     String.format(USUARIO_NO_ENCONTRADO_MENSAJE, usuarioId)
                             )
                     )

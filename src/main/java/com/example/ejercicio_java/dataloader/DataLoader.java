@@ -30,7 +30,7 @@ public class DataLoader implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         List<LibroDAO> libros = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
             String titulo = "titulo " + i;
@@ -52,7 +52,7 @@ public class DataLoader implements CommandLineRunner {
         for (int i = 0; i < 3; i++) {
             UsuarioDAO usuarioPrestamo = usuarios.get(i);
             LibroDAO libroPrestamo = libros.get(i);
-            LocalDate fechaPrestamo = LocalDate.now().minusDays(7L*i);
+            LocalDate fechaPrestamo = LocalDate.now().minusWeeks(i);
             LocalDate fechaDevolucion = LocalDate.now();
             prestamoRepository.save(new PrestamoDAO(
                     usuarioPrestamo,

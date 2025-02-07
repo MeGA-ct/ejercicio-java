@@ -6,8 +6,12 @@ import com.example.ejercicio_java.dao.UsuarioDAO;
 import com.example.ejercicio_java.dto.LibroDTO;
 import com.example.ejercicio_java.dto.PrestamoDTO;
 import com.example.ejercicio_java.dto.UsuarioDTO;
+import com.example.ejercicio_java.exceptions.libro.LibroException;
 import com.example.ejercicio_java.exceptions.prestamo.PrestamoException;
+import com.example.ejercicio_java.exceptions.usuario.UsuarioException;
+import com.example.ejercicio_java.repository.LibroRepository;
 import com.example.ejercicio_java.repository.PrestamoRepository;
+import com.example.ejercicio_java.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,10 +20,14 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import static com.example.ejercicio_java.service.impl.LibroServiceImpl.LIBRO_NO_ENCONTRADO_MENSAJE;
 import static com.example.ejercicio_java.service.impl.PrestamoServiceImpl.PRESTAMO_NO_ENCONTRADO_MENSAJE;
+import static com.example.ejercicio_java.service.impl.UsuarioServiceImpl.USUARIO_NO_ENCONTRADO_MENSAJE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,8 +38,16 @@ import static org.mockito.Mockito.when;
 
 class PrestamoServiceImplTest {
 
+    private static final Long ID_NO_VALIDA = 0L;
+
     @Mock
     private PrestamoRepository prestamoRepository;
+
+    @Mock
+    private UsuarioRepository usuarioRepository;
+
+    @Mock
+    private LibroRepository libroRepository;
 
     @InjectMocks
     private PrestamoServiceImpl prestamoService;
@@ -63,7 +79,7 @@ class PrestamoServiceImplTest {
                             "isbn " + i,
                             LocalDate.now().minusYears(i)
                     ),
-                    LocalDate.now().minusDays(7L * i),
+                    LocalDate.now().minusWeeks(i),
                     LocalDate.now()
             );
             prestamoDTOList.add(prestamoDTO);
@@ -83,7 +99,7 @@ class PrestamoServiceImplTest {
                             "isbn " + i,
                             LocalDate.now().minusYears(i)
                     ),
-                    LocalDate.now().minusDays(7L * i),
+                    LocalDate.now().minusWeeks(i),
                     LocalDate.now()
             );
             prestamoDAO.getUsuario().setId((long) i);
@@ -93,7 +109,7 @@ class PrestamoServiceImplTest {
         }
         prestamoExceptionNoEncontrado = new PrestamoException(
                 PrestamoException.NO_ENCONTRADO,
-                String.format(PRESTAMO_NO_ENCONTRADO_MENSAJE, 0L)
+                String.format(PRESTAMO_NO_ENCONTRADO_MENSAJE, ID_NO_VALIDA)
         );
     }
 
@@ -119,10 +135,8 @@ class PrestamoServiceImplTest {
 
     @Test
     void testObtenerUnPrestamoNotFound() {
-        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
         PrestamoException prestamoException = assertThrows(
-                PrestamoException.class, () -> prestamoService.obtenerUnPrestamo(0L));
+                PrestamoException.class, () -> prestamoService.obtenerUnPrestamo(ID_NO_VALIDA));
 
         assertEquals(prestamoExceptionNoEncontrado.getMessage(), prestamoException.getMessage());
     }
@@ -167,23 +181,135 @@ class PrestamoServiceImplTest {
     @Test
     void testActualizarPrestamoNotFound() {
         PrestamoDTO prestamoDTO = prestamoDTOList.get(0);
-        prestamoDTO.setId(0L);
-        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        prestamoDTO.setId(ID_NO_VALIDA);
 
         PrestamoException prestamoException = assertThrows(
                 PrestamoException.class, () -> prestamoService.actualizarPrestamo(prestamoDTO));
 
         assertEquals(prestamoExceptionNoEncontrado.getMessage(), prestamoException.getMessage());
     }
-/*TODO:
+
     @Test
     void testActualizarParcialmentePrestamo() {
-        Map<String, Object> nuevosDatos = new HashMap<>();
-        nuevosDatos.put("nombre", "Nuevo Nombre");
-        nuevosDatos.put("telefono", "Nuevo Telef.");
-        nuevosDatos.put("fechaRegistro", LocalDate.now().toString());
+        PrestamoDAO prestamoDAO = prestamoDAOList.get(0);
+        Map<String, Object> update = new HashMap<>();
+        update.put("usuarioId", prestamoDAO.getUsuario().getId());
+        update.put("libroId", prestamoDAO.getLibro().getId());
+        update.put("fechaPrestamo", LocalDate.now().toString());
+        update.put("fechaDevolucion", LocalDate.now().toString());
+
+        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO));
+        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getUsuario()));
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getLibro()));
+        when(prestamoRepository.save(any(PrestamoDAO.class))).thenReturn(prestamoDAO);
+
+        PrestamoDTO resultado = prestamoService.actualizarParcialmentePrestamo(prestamoDAO.getId(), update);
+
+        assertEquals(prestamoDAO.getId(), resultado.getId());
+        assertEquals(prestamoDAO.getUsuario().getId(), resultado.getUsuario().getId());
+        assertEquals(prestamoDAO.getLibro().getId(), resultado.getLibro().getId());
+        assertEquals(prestamoDAO.getFechaPrestamo(), resultado.getFechaPrestamo());
+        assertEquals(prestamoDAO.getFechaDevolucion(), resultado.getFechaDevolucion());
     }
-*/
+
+    @Test
+    void testActualizarParcialmentePrestamoUsuarioNotFound() {
+        UsuarioException usuarioException = new UsuarioException(
+                UsuarioException.NO_ENCONTRADO, String.format(USUARIO_NO_ENCONTRADO_MENSAJE, ID_NO_VALIDA));
+        PrestamoDAO prestamoDAO = prestamoDAOList.get(0);
+        Long prestamoId = prestamoDAO.getId();
+        Map<String, Object> update = new HashMap<>();
+        update.put("usuarioId", ID_NO_VALIDA);
+        update.put("libroId", prestamoDAO.getLibro().getId());
+        update.put("fechaPrestamo", LocalDate.now().toString());
+        update.put("fechaDevolucion", LocalDate.now().toString());
+
+        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO));
+
+        UsuarioException exception = assertThrows(
+                UsuarioException.class,
+                () -> prestamoService.actualizarParcialmentePrestamo(prestamoId, update)
+        );
+
+        assertEquals(usuarioException.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void testActualizarParcialmentePrestamoLibroNotFound() {
+        LibroException libroException = new LibroException(
+                LibroException.NO_ENCONTRADO, String.format(LIBRO_NO_ENCONTRADO_MENSAJE, ID_NO_VALIDA));
+        PrestamoDAO prestamoDAO = prestamoDAOList.get(0);
+        Long prestamoId = prestamoDAO.getId();
+        Map<String, Object> update = new HashMap<>();
+        update.put("usuarioId", prestamoDAO.getUsuario().getId());
+        update.put("libroId", ID_NO_VALIDA);
+        update.put("fechaPrestamo", LocalDate.now().toString());
+        update.put("fechaDevolucion", LocalDate.now().toString());
+
+        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO));
+        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getUsuario()));
+
+        LibroException exception = assertThrows(
+                LibroException.class,
+                () -> prestamoService.actualizarParcialmentePrestamo(prestamoId, update)
+        );
+
+        assertEquals(libroException.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void testActualizarParcialmentePrestamoNotFound() {
+        Map<String, Object> update = new HashMap<>();
+
+        PrestamoException exception = assertThrows(
+                PrestamoException.class,
+                () -> prestamoService.actualizarParcialmentePrestamo(ID_NO_VALIDA, update)
+        );
+
+        assertEquals(prestamoExceptionNoEncontrado.getMessage(), exception.getMessage());
+    }
+
+    @Test
+    void testActualizarParcialmentePrestamo_SinUsuarioSinLibroConFechaPrestamoSinFechaDevolucion() {
+        PrestamoDAO prestamoDAO = prestamoDAOList.get(0);
+        Map<String, Object> update = new HashMap<>();
+        update.put("fechaPrestamo", LocalDate.now().minusWeeks(1).toString());
+        prestamoDAO.setFechaPrestamo(LocalDate.now().minusWeeks(1));
+
+        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO));
+        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getUsuario()));
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getLibro()));
+        when(prestamoRepository.save(any(PrestamoDAO.class))).thenReturn(prestamoDAO);
+
+        PrestamoDTO resultado = prestamoService.actualizarParcialmentePrestamo(prestamoDAO.getId(), update);
+
+        assertEquals(prestamoDAO.getId(), resultado.getId());
+        assertEquals(prestamoDAO.getUsuario().getId(), resultado.getUsuario().getId());
+        assertEquals(prestamoDAO.getLibro().getId(), resultado.getLibro().getId());
+        assertEquals(prestamoDAO.getFechaPrestamo(), resultado.getFechaPrestamo());
+        assertEquals(prestamoDAO.getFechaDevolucion(), resultado.getFechaDevolucion());
+    }
+
+    @Test
+    void testActualizarParcialmentePrestamo_SinUsuarioSinLibroSinFechaPrestamoConFechaDevolucion() {
+        PrestamoDAO prestamoDAO = prestamoDAOList.get(0);
+        Map<String, Object> update = new HashMap<>();
+        update.put("fechaDevolucion", LocalDate.now().minusWeeks(1).toString());
+        prestamoDAO.setFechaDevolucion(LocalDate.now().minusWeeks(1));
+
+        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO));
+        when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getUsuario()));
+        when(libroRepository.findById(any(Long.class))).thenReturn(Optional.of(prestamoDAO.getLibro()));
+        when(prestamoRepository.save(any(PrestamoDAO.class))).thenReturn(prestamoDAO);
+
+        PrestamoDTO resultado = prestamoService.actualizarParcialmentePrestamo(prestamoDAO.getId(), update);
+
+        assertEquals(prestamoDAO.getId(), resultado.getId());
+        assertEquals(prestamoDAO.getUsuario().getId(), resultado.getUsuario().getId());
+        assertEquals(prestamoDAO.getLibro().getId(), resultado.getLibro().getId());
+        assertEquals(prestamoDAO.getFechaPrestamo(), resultado.getFechaPrestamo());
+        assertEquals(prestamoDAO.getFechaDevolucion(), resultado.getFechaDevolucion());
+    }
 
     @Test
     void testBorrarPrestamo() {
@@ -201,11 +327,10 @@ class PrestamoServiceImplTest {
 
     @Test
     void testBorrarPrestamoNotFound() {
-        when(prestamoRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         PrestamoException exception = assertThrows(
                 PrestamoException.class,
-                () -> prestamoService.borrarPrestamo(0L)
+                () -> prestamoService.borrarPrestamo(ID_NO_VALIDA)
         );
 
         assertEquals(prestamoExceptionNoEncontrado.getMessage(), exception.getMessage());
