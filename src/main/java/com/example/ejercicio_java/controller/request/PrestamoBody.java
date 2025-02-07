@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record UsuarioBody(
+public record PrestamoBody(
         @NotNull
-        String nombre,
+        Long usuarioId,
         @NotNull
-        String email,
+        Long libroId,
         @NotNull
-        String telefono,
-        LocalDate fechaRegistro
+        LocalDate fechaPrestamo,
+        LocalDate fechaDevolucion
         ) {
 }

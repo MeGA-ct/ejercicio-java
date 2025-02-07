@@ -40,8 +40,8 @@ class UsuarioServiceImplTest {
 
     List<UsuarioDTO> usuariosDto = new ArrayList<>();
 
-    UsuarioException errorUsuarioNoEncontrado;
-    UsuarioException errorISBNDuplicado;
+    private UsuarioException errorUsuarioNoEncontrado;
+    private UsuarioException errorEMAILDuplicado;
 
     @BeforeEach
     public void setUp() {
@@ -72,7 +72,7 @@ class UsuarioServiceImplTest {
                         usuariosDto.get(0).getId()
                 )
         );
-        errorISBNDuplicado = new UsuarioException(
+        errorEMAILDuplicado = new UsuarioException(
                 UsuarioException.EMAIL_DUPLICADO,
                 String.format(
                         USUARIO_EMAIL_DUPLICADO_MENSAJE,
@@ -108,7 +108,8 @@ class UsuarioServiceImplTest {
     void testObtenerUnUsuarioNotFound() {
         when(usuarioRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        UsuarioException exception = assertThrows(UsuarioException.class, () -> usuarioService.obtenerUnUsuario(1L));
+        UsuarioException exception = assertThrows(
+                UsuarioException.class, () -> usuarioService.obtenerUnUsuario(1L));
 
         assertEquals(errorUsuarioNoEncontrado.getMessage(), exception.getMessage());
     }
@@ -126,7 +127,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void testGuardarUsuarioISBNDuplicado() {
+    void testGuardarUsuarioEMAILDuplicado() {
         UsuarioDTO unUsuario = usuariosDto.get(0);
         UsuarioException errorEsperado = new UsuarioException(
                 UsuarioException.EMAIL_DUPLICADO,
@@ -137,7 +138,7 @@ class UsuarioServiceImplTest {
         );
 
         when(usuarioRepository.save(any(UsuarioDAO.class))).thenThrow(new DataIntegrityViolationException(
-                "ISBN Duplicado"));
+                "EMAIL Duplicado"));
 
         UsuarioException exception = assertThrows(
                 UsuarioException.class,
@@ -179,19 +180,19 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void testActualizarUsuarioISBNDuplicado() {
+    void testActualizarUsuarioEMAILDuplicado() {
         UsuarioDTO unUsuario = usuariosDto.get(0);
 
         when(usuarioRepository.findById(unUsuario.getId())).thenReturn(Optional.of(usuariosDao.get(0)));
         when(usuarioRepository.save(any(UsuarioDAO.class))).thenThrow(new DataIntegrityViolationException(
-                "ISBN Duplicado"));
+                "EMAIL Duplicado"));
 
         UsuarioException exception = assertThrows(
                 UsuarioException.class,
                 () -> usuarioService.actualizarUsuario(unUsuario)
         );
 
-        assertEquals(errorISBNDuplicado.getMessage(), exception.getMessage());
+        assertEquals(errorEMAILDuplicado.getMessage(), exception.getMessage());
     }
 
     @Test
@@ -233,7 +234,7 @@ class UsuarioServiceImplTest {
     }
 
     @Test
-    void testActualizarParcialmenteUsuarioISBNDuplicado() {
+    void testActualizarParcialmenteUsuarioEMAILDuplicado() {
         UsuarioDTO unUsuario = usuariosDto.get(0);
         Long usuarioId = unUsuario.getId();
         Map<String, Object> nuevosDatos = new HashMap<>();
@@ -251,7 +252,7 @@ class UsuarioServiceImplTest {
                 )
         );
 
-        assertEquals(errorISBNDuplicado.getMessage(), exception.getMessage());
+        assertEquals(errorEMAILDuplicado.getMessage(), exception.getMessage());
     }
 
     @Test

@@ -48,36 +48,36 @@ public class UsuarioController {
     }
 
     @GetMapping(path = "/{id}")
-    public ResponseEntity<Object> obtenerUnUsuario(@PathVariable("id") Long libroId) {
+    public ResponseEntity<Object> obtenerUnUsuario(@PathVariable("id") Long usuarioId) {
         LOGGER.info("UsuarioController.obtenerUnUsuario: obteniendo un usuario");
 
         try {
-            UsuarioDTO resultado = usuarioService.obtenerUnUsuario(libroId);
+            UsuarioDTO resultado = usuarioService.obtenerUnUsuario(usuarioId);
 
             LOGGER.info("UsuarioController.obtenerUnUsuario: usuario {} encontrado", resultado.getEmail());
 
             return ResponseEntity.ok(resultado);
         } catch (UsuarioException e) {
-            LOGGER.info("UsuarioController.obtenerUnUsuario: error al obtener usuario con id {}.", libroId);
+            LOGGER.info("UsuarioController.obtenerUnUsuario: error al obtener usuario con id {}.", usuarioId);
 
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping
-    public ResponseEntity<Object> guardarUsuario(@RequestBody UsuarioBody libro) {
-        LOGGER.info("UsuarioController.guardarUsuario: guardando un nuevo libro");
+    public ResponseEntity<Object> guardarUsuario(@RequestBody UsuarioBody usuario) {
+        LOGGER.info("UsuarioController.guardarUsuario: guardando un nuevo usuario");
 
-        UsuarioDTO libroDTO = new UsuarioDTO(
+        UsuarioDTO usuarioDTO = new UsuarioDTO(
                 null,
-                libro.nombre(),
-                libro.email(),
-                libro.telefono(),
-                libro.fechaRegistro()
+                usuario.nombre(),
+                usuario.email(),
+                usuario.telefono(),
+                usuario.fechaRegistro()
         );
 
         try {
-            UsuarioDTO resultado = usuarioService.guardarUsuario(libroDTO);
+            UsuarioDTO resultado = usuarioService.guardarUsuario(usuarioDTO);
 
             LOGGER.info("UsuarioController.guardarUsuario: creado el usuario con id {}", resultado.getId());
 
@@ -91,23 +91,23 @@ public class UsuarioController {
     @PutMapping(path = "/{id}")
     public ResponseEntity<Object> actualizarUsuario(
             @PathVariable("id") Long usuarioId,
-            @RequestBody UsuarioBody libro
+            @RequestBody UsuarioBody usuario
     ) {
         LOGGER.info("UsuarioController.actualizarUsuario: actualizando usuario {}", usuarioId);
-        UsuarioDTO libroDTO = new UsuarioDTO(
+        UsuarioDTO usuarioDTO = new UsuarioDTO(
                 usuarioId,
-                libro.nombre(),
-                libro.email(),
-                libro.telefono(),
-                libro.fechaRegistro()
+                usuario.nombre(),
+                usuario.email(),
+                usuario.telefono(),
+                usuario.fechaRegistro()
         );
         try {
-            UsuarioDTO resultado = usuarioService.actualizarUsuario(libroDTO);
+            UsuarioDTO resultado = usuarioService.actualizarUsuario(usuarioDTO);
 
             LOGGER.info("UsuarioController.actualizarUsuario: modificado el usuario con id {}", resultado.getId());
             return ResponseEntity.ok(resultado);
         } catch (UsuarioException e) {
-            LOGGER.info("UsuarioController.actualizarUsuario: error al modificar libro con id {}", usuarioId);
+            LOGGER.info("UsuarioController.actualizarUsuario: error al modificar usuario con id {}", usuarioId);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
